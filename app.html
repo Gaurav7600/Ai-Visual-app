@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Visual Learning Assistant</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f9ff;
+        }
+        .camera-container {
+            position: relative;
+            width: 100%;
+            max-width: 640px;
+            margin: 0 auto;
+        }
+        #video {
+            width: 100%;
+            border-radius: 12px;
+        }
+        .loading-spinner {
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div id="app" class="min-h-screen p-4">
+        <header class="text-center mb-8">
+            <h1 class="text-3xl font-bold text-sky-800 mb-2">AI Visual Learning Assistant</h1>
+            <p class="text-gray-600">Point your camera at any problem and get instant solutions!</p>
+        </header>
+
+        <main class="max-w-4xl mx-auto">
+            <div class="camera-container mb-6">
+                <video id="video" autoplay playsinline class="bg-gray-100 shadow-lg"></video>
+                <button @click="captureImage" class="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-sky-600 text-white px-6 py-2 rounded-full hover:bg-sky-700 transition-colors flex items-center gap-2">
+                    <i class="bi bi-camera-fill"></i>
+                    Capture
+                </button>
+            </div>
+
+            <div v-if="loading" class="text-center py-8">
+                <i class="bi bi-arrow-repeat loading-spinner text-4xl text-sky-600"></i>
+                <p class="mt-2 text-gray-600">Analyzing image...</p>
+            </div>
+
+            <div v-if="result" class="bg-white rounded-lg shadow-lg p-6 mb-6">
+                <h2 class="text-xl font-semibold text-sky-800 mb-4">Analysis Result</h2>
+                <p class="text-gray-700 whitespace-pre-line">{{ result }}</p>
+            </div>
+
+            <div class="bg-sky-50 rounded-lg p-6 mb-6">
+                <h2 class="text-xl font-semibold text-sky-800 mb-4">How it works</h2>
+                <div class="grid md:grid-cols-3 gap-4">
+                    <div class="bg-white p-4 rounded-lg shadow">
+                        <i class="bi bi-camera text-3xl text-sky-600"></i>
+                        <h3 class="font-semibold mt-2">Capture</h3>
+                        <p class="text-sm text-gray-600">Point your camera at any problem you need help with</p>
+                    </div>
+                    <div class="bg-white p-4 rounded-lg shadow">
+                        <i class="bi bi-brain text-3xl text-sky-600"></i>
+                        <h3 class="font-semibold mt-2">Analyze</h3>
+                        <p class="text-sm text-gray-600">Our AI processes and understands the problem</p>
+                    </div>
+                    <div class="bg-white p-4 rounded-lg shadow">
+                        <i class="bi bi-lightbulb text-3xl text-sky-600"></i>
+                        <h3 class="font-semibold mt-2">Solution</h3>
+                        <p class="text-sm text-gray-600">Get detailed explanations and solutions</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const { createApp } = Vue;
+
+        createApp({
+            data() {
+                return {
+                    loading: false,
+                    result: null,
+                    stream: null
+                }
+            },
+            mounted() {
+                this.initializeCamera();
+            },
+            methods: {
+                async initializeCamera() {
+                    try {
+                        const constraints = {
+                            video: {
+                                facingMode: 'environment'
+                            }
+                        };
+                        this.stream = await navigator.mediaDevices.getUserMedia(constraints);
+                        const video = document.getElementById('video');
+                        video.srcObject = this.stream;
+                    } catch (err) {
+                        console.error('Error accessing camera:', err);
+                        alert('Unable to access camera. Please ensure you have granted camera permissions.');
+                    }
+                },
+                async captureImage() {
+                    const video = document.getElementById('video');
+                    const canvas = document.createElement('canvas');
+                    canvas.width = video.videoWidth;
+                    canvas.height = video.videoHeight;
+                    canvas.getContext('2d').drawImage(video, 0, 0);
+                    
+                    const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg'));
+                    const formData = new FormData();
+                    formData.append('file', blob, 'capture.jpg');
+                    formData.append('userId', 'demo-user');
+                    formData.append('appSlug', 'visual-learning-123');
+
+                    this.loading = true;
+                    try {
+                        // Upload image
+                        const uploadResponse = await fetch('https://r0c8kgwocscg8gsokogwwsw4.zetaverse.one/storage/upload', {
+                            method: 'POST',
+                            headers: {
+                                'Authorization': 'Bearer 3RHr4s5KY5Xm7UayGTgoy1U9lcZ2'
+                            },
+                            body: formData
+                        });
+                        const uploadData = await uploadResponse.json();
+
+                        // Analyze image with AI
+                        const aiResponse = await fetch('https://r0c8kgwocscg8gsokogwwsw4.zetaverse.one/ai', {
+                            method: 'POST',
+                            headers: {
+                                'Authorization': 'Bearer 3RHr4s5KY5Xm7UayGTgoy1U9lcZ2',
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                messages: [{
+                                    role: 'user',
+                                    content: [
+                                        {
+                                            type: 'text',
+                                            text: 'Please analyze this image and provide a detailed explanation of the problem and its solution. If it\'s a math problem, show the steps to solve it. If it\'s a science question, explain the concepts involved.'
+                                        },
+                                        {
+                                            type: 'image_url',
+                                            image_url: {
+                                                url: uploadData.url
+                                            }
+                                        }
+                                    ]
+                                }]
+                            })
+                        });
+                        const aiData = await aiResponse.json();
+                        this.result = aiData.message;
+                    } catch (error) {
+                        console.error('Error processing image:', error);
+                        this.result = 'Sorry, there was an error processing your image. Please try again.';
+                    } finally {
+                        this.loading = false;
+                    }
+                }
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>
