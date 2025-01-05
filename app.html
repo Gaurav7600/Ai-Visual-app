@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,70 +12,145 @@
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f0f9ff;
+            background-color: #121212; /* Dark background */
+            color: #ffffff; /* White text for contrast */
         }
+
+        header {
+            background-color: #e63946; /* Bold red */
+            color: #ffffff;
+            padding: 2rem;
+            text-align: center;
+            border-bottom: 4px solid #f1faee;
+        }
+
         .camera-container {
             position: relative;
-            width: 100%;
             max-width: 640px;
-            margin: 0 auto;
+            margin: 2rem auto;
+            border: 4px solid #f1faee;
+            border-radius: 12px;
+            overflow: hidden;
         }
+
         #video {
             width: 100%;
-            border-radius: 12px;
+            display: block;
         }
+
+        .capture-button {
+            position: absolute;
+            bottom: 1rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #e63946;
+            color: #ffffff;
+            padding: 0.8rem 2rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 9999px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .capture-button:hover {
+            background-color: #f77f82;
+            transform: translateX(-50%) scale(1.05);
+        }
+
         .loading-spinner {
             animation: spin 1s linear infinite;
         }
+
         @keyframes spin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .result-container {
+            background-color: #1d3557;
+            color: #f1faee;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            margin-bottom: 2rem;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .info-card {
+            background-color: #457b9d;
+            color: #ffffff;
+            padding: 1rem;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .info-card i {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
         }
     </style>
 </head>
+
 <body>
-    <div id="app" class="min-h-screen p-4">
-        <header class="text-center mb-8">
-            <h1 class="text-3xl font-bold text-sky-800 mb-2">AI Visual Learning Assistant</h1>
-            <p class="text-gray-600">Point your camera at any problem and get instant solutions!</p>
+    <div id="app" class="min-h-screen">
+        <header>
+            <h1 class="text-4xl font-bold">AI Visual Learning Assistant</h1>
+            <p class="text-lg">Point your camera at any problem and get instant solutions!</p>
         </header>
 
-        <main class="max-w-4xl mx-auto">
-            <div class="camera-container mb-6">
-                <video id="video" autoplay playsinline class="bg-gray-100 shadow-lg"></video>
-                <button @click="captureImage" class="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-sky-600 text-white px-6 py-2 rounded-full hover:bg-sky-700 transition-colors flex items-center gap-2">
-                    <i class="bi bi-camera-fill"></i>
-                    Capture
+        <main class="max-w-4xl mx-auto p-4">
+            <!-- Camera Section -->
+            <div class="camera-container">
+                <video id="video" autoplay playsinline></video>
+                <button @click="captureImage" class="capture-button">
+                    <i class="bi bi-camera-fill"></i> Capture
                 </button>
             </div>
 
+            <!-- Loading Spinner -->
             <div v-if="loading" class="text-center py-8">
-                <i class="bi bi-arrow-repeat loading-spinner text-4xl text-sky-600"></i>
-                <p class="mt-2 text-gray-600">Analyzing image...</p>
+                <i class="bi bi-arrow-repeat loading-spinner text-4xl" style="color: #e63946;"></i>
+                <p class="mt-2">Analyzing image...</p>
             </div>
 
-            <div v-if="result" class="bg-white rounded-lg shadow-lg p-6 mb-6">
-                <h2 class="text-xl font-semibold text-sky-800 mb-4">Analysis Result</h2>
-                <p class="text-gray-700 whitespace-pre-line">{{ result }}</p>
+            <!-- Result Section -->
+            <div v-if="result" class="result-container">
+                <h2 class="text-2xl font-bold mb-4">Analysis Result</h2>
+                <p class="whitespace-pre-line">{{ result }}</p>
             </div>
 
-            <div class="bg-sky-50 rounded-lg p-6 mb-6">
-                <h2 class="text-xl font-semibold text-sky-800 mb-4">How it works</h2>
-                <div class="grid md:grid-cols-3 gap-4">
-                    <div class="bg-white p-4 rounded-lg shadow">
-                        <i class="bi bi-camera text-3xl text-sky-600"></i>
+            <!-- How it Works Section -->
+            <div>
+                <h2 class="text-2xl font-bold text-center text-sky-400 mb-6">How it Works</h2>
+                <div class="info-grid">
+                    <div class="info-card">
+                        <i class="bi bi-camera"></i>
                         <h3 class="font-semibold mt-2">Capture</h3>
-                        <p class="text-sm text-gray-600">Point your camera at any problem you need help with</p>
+                        <p>Point your camera at any problem you need help with.</p>
                     </div>
-                    <div class="bg-white p-4 rounded-lg shadow">
-                        <i class="bi bi-brain text-3xl text-sky-600"></i>
+                    <div class="info-card">
+                        <i class="bi bi-brain"></i>
                         <h3 class="font-semibold mt-2">Analyze</h3>
-                        <p class="text-sm text-gray-600">Our AI processes and understands the problem</p>
+                        <p>Our AI processes and understands the problem.</p>
                     </div>
-                    <div class="bg-white p-4 rounded-lg shadow">
-                        <i class="bi bi-lightbulb text-3xl text-sky-600"></i>
+                    <div class="info-card">
+                        <i class="bi bi-lightbulb"></i>
                         <h3 class="font-semibold mt-2">Solution</h3>
-                        <p class="text-sm text-gray-600">Get detailed explanations and solutions</p>
+                        <p>Get detailed explanations and solutions.</p>
                     </div>
                 </div>
             </div>
@@ -117,7 +193,7 @@
                     canvas.width = video.videoWidth;
                     canvas.height = video.videoHeight;
                     canvas.getContext('2d').drawImage(video, 0, 0);
-                    
+
                     const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg'));
                     const formData = new FormData();
                     formData.append('file', blob, 'capture.jpg');
@@ -127,7 +203,7 @@
                     this.loading = true;
                     try {
                         // Upload image
-                        const uploadResponse = await fetch('https://r0c8kgwocscg8gsokogwwsw4.zetaverse.one/storage/upload', {
+                        const uploadResponse = await fetch('https://jsonplaceholder.typicode.com/posts', {
                             method: 'POST',
                             headers: {
                                 'Authorization': 'Bearer 3RHr4s5KY5Xm7UayGTgoy1U9lcZ2'
@@ -137,7 +213,7 @@
                         const uploadData = await uploadResponse.json();
 
                         // Analyze image with AI
-                        const aiResponse = await fetch('https://r0c8kgwocscg8gsokogwwsw4.zetaverse.one/ai', {
+                        const aiResponse = await fetch('https://jsonplaceholder.typicode.com/posts/1/comments', {
                             method: 'POST',
                             headers: {
                                 'Authorization': 'Bearer 3RHr4s5KY5Xm7UayGTgoy1U9lcZ2',
@@ -174,4 +250,5 @@
         }).mount('#app');
     </script>
 </body>
+
 </html>
